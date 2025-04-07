@@ -8,8 +8,8 @@ services:
     tty: true
     environment:
       # Application settings
-      APP_URL: https://invoiceninja.yourdomain.com
-      REACT_URL: https://invoiceninja.yourdomain.com
+      APP_URL: http://localhost:9000
+      REACT_URL: http://localhost:9000
       APP_DEBUG: 'false'
       APP_KEY: base64:RR++yx2rJ9kdxbdh3+AmbHLDQu+Q76i++co9Y8ybbno=
       NINJA_ENVIRONMENT: selfhost
@@ -35,8 +35,6 @@ services:
       
       # PDF generator
       PDF_GENERATOR: hosted_ninja
-    ports:
-      - "9000:9000"
     volumes:
       - ninja_storage:/var/www/storage
       - ninja_public:/var/www/public
@@ -45,6 +43,23 @@ services:
     depends_on:
       - db
       - redis
+
+  # Caddy Service
+  webserver:
+    image: caddy:2-alpine
+    container_name: invoiceninja-caddy
+    restart: unless-stopped
+    ports:
+      - "9000:80"
+    volumes:
+      - ninja_public:/var/www/public
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - ninja_network
+    depends_on:
+      - app
 
   # MySQL Service
   db:
@@ -81,4 +96,8 @@ volumes:
   ninja_public:
     driver: local
   ninja_mysql:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
     driver: local 

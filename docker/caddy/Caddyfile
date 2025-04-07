@@ -1,0 +1,14 @@
+:80 {
+	root * /var/www/public
+	
+	@notStatic {
+		not path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf
+	}
+	
+	php_fastcgi @notStatic app:9000
+	encode gzip
+	file_server
+	
+	# Enable this for pretty URLs
+	try_files {path} {path}/ /index.php?{query}
+} 
