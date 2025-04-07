@@ -1,0 +1,67 @@
+version: '3'
+services:
+  # PHP Service
+  app:
+    image: nrgnr/invoiceninja:local
+    container_name: invoiceninja-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      DB_HOST: db
+      DB_DATABASE: ninja
+      DB_USERNAME: ninja
+      DB_PASSWORD: ninja
+      REDIS_HOST: redis
+      APP_URL: http://localhost:8000
+      BROADCAST_DRIVER: log
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    volumes:
+      - ninja_storage:/var/www/storage
+      - ninja_public:/var/www/public
+    networks:
+      - ninja_network
+    depends_on:
+      - db
+      - redis
+
+  # MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: invoiceninja-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ninja
+      MYSQL_USER: ninja
+      MYSQL_PASSWORD: ninja
+      MYSQL_ROOT_PASSWORD: ninja_root
+    volumes:
+      - ninja_mysql:/var/lib/mysql
+    networks:
+      - ninja_network
+
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: invoiceninja-redis
+    restart: unless-stopped
+    networks:
+      - ninja_network
+
+# Networks
+networks:
+  ninja_network:
+    driver: bridge
+
+# Volumes
+volumes:
+  ninja_storage:
+    driver: local
+  ninja_public:
+    driver: local
+  ninja_mysql:
+    driver: local 
