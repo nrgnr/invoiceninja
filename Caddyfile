@@ -1,0 +1,39 @@
+invoiceninja.yourdomain.com {
+    reverse_proxy /index.php* invoiceninja-app:9000 {
+        transport fastcgi {
+            root /var/www/public
+        }
+    }
+
+    reverse_proxy /storage/* invoiceninja-app:9000 {
+        transport fastcgi {
+            root /var/www/public
+        }
+    }
+
+    @phpFiles {
+        path *.php
+    }
+    reverse_proxy @phpFiles invoiceninja-app:9000 {
+        transport fastcgi {
+            root /var/www/public
+        }
+    }
+
+    # Serve static files directly
+    root * /var/www/public
+    file_server
+
+    # Rewrite for Laravel
+    try_files {path} {path}/ /index.php?{query}
+
+    # Handle errors
+    handle_errors {
+        respond "{http.error.status_code} {http.error.status_text}"
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/invoiceninja.log
+    }
+} 

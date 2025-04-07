@@ -7,19 +7,36 @@ services:
     restart: unless-stopped
     tty: true
     environment:
+      # Application settings
+      APP_URL: https://invoiceninja.yourdomain.com
+      REACT_URL: https://invoiceninja.yourdomain.com
+      APP_DEBUG: 'false'
+      APP_KEY: base64:RR++yx2rJ9kdxbdh3+AmbHLDQu+Q76i++co9Y8ybbno=
+      NINJA_ENVIRONMENT: selfhost
+      
+      # Database settings
       DB_HOST: db
       DB_DATABASE: ninja
       DB_USERNAME: ninja
       DB_PASSWORD: ninja
+      DB_PORT: 3306
+      
+      # Redis settings
       REDIS_HOST: redis
-      APP_URL: http://localhost:8000
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+      
+      # Cache and sessions
       BROADCAST_DRIVER: log
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
+      SESSION_LIFETIME: 120
+      
+      # PDF generator
+      PDF_GENERATOR: hosted_ninja
     ports:
       - "9000:9000"
-      - "8000:8000"
     volumes:
       - ninja_storage:/var/www/storage
       - ninja_public:/var/www/public
