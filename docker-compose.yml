@@ -1,0 +1,74 @@
+version: '3'
+services:
+  # PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: invoiceninja-app
+    container_name: invoiceninja-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./storage:/var/www/storage
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - invoiceninja-network
+
+  # Nginx Service
+  webserver:
+    image: nginx:alpine
+    container_name: invoiceninja-nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./public:/var/www/public
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - invoiceninja-network
+
+  # MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: invoiceninja-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ninja
+      MYSQL_USER: ninja
+      MYSQL_PASSWORD: ninja
+      MYSQL_ROOT_PASSWORD: ninja_root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - invoiceninjadbdata:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - invoiceninja-network
+
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: invoiceninja-redis
+    restart: unless-stopped
+    networks:
+      - invoiceninja-network
+
+# Networks
+networks:
+  invoiceninja-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  invoiceninjadbdata:
+    driver: local 
